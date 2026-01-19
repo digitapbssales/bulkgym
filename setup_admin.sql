@@ -1,21 +1,13 @@
 -- 1. Ensure the user exists in Supabase Dashboard -> Authentication -> Users
 --    Email: superadmin@bulkgym.com
---    (If not, create it manually or sign up)
 
 -- 2. Run this SQL in Supabase Dashboard -> SQL Editor:
+--    This version overwrites metadata directly to avoid JSON merging issues.
 
 UPDATE auth.users
 SET
-  raw_user_meta_data = jsonb_set(
-    COALESCE(raw_user_meta_data, '{}'::jsonb),
-    '{role}',
-    '"superAdmin"'
-  ),
-  raw_app_meta_data = jsonb_set(
-    COALESCE(raw_app_meta_data, '{}'::jsonb),
-    '{role}',
-    '"superAdmin"'
-  ),
+  raw_user_meta_data = '{"role": "superAdmin", "email_verified": true}',
+  raw_app_meta_data = '{"role": "superAdmin", "provider": "email", "providers": ["email"]}',
   is_super_admin = true
 WHERE email = 'superadmin@bulkgym.com';
 

@@ -31,14 +31,15 @@ export class AdminAuthService {
         '') || '';
 
     // Fail-safe: Allow specific superadmin email even if metadata is missing/delayed
-    if (role !== 'superAdmin' && user?.email !== 'superadmin@bulkgym.com') {
+    const isSuperEmail = user?.email?.toLowerCase() === 'superadmin@bulkgym.com';
+    
+    if (role !== 'superAdmin' && !isSuperEmail) {
       console.error(
-        'Super Admin Login Failed. Role found:',
-        role,
-        'User metadata:',
-        user?.user_metadata,
-        'App metadata:',
-        user?.app_metadata,
+        'Super Admin Login Failed.',
+        'Role:', role,
+        'Email:', user?.email,
+        'User metadata:', user?.user_metadata,
+        'App metadata:', user?.app_metadata,
       );
       await supabase.auth.signOut();
       throw new Error('not_super_admin');
