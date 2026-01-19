@@ -31,6 +31,14 @@ export class AdminAuthService {
         '') || '';
 
     if (role !== 'superAdmin') {
+      console.error(
+        'Super Admin Login Failed. Role found:',
+        role,
+        'User metadata:',
+        user?.user_metadata,
+        'App metadata:',
+        user?.app_metadata,
+      );
       await supabase.auth.signOut();
       throw new Error('not_super_admin');
     }
