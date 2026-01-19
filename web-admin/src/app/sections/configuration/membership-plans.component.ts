@@ -1,6 +1,8 @@
 import {CommonModule} from '@angular/common';
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {createClient} from '@supabase/supabase-js';
+import {getSupabaseEnv} from '../../config/supabase-env';
 
 type BillingPeriod = 'monthly' | 'yearly';
 
@@ -11,6 +13,17 @@ type MembershipPlan = {
   price: number;
   isActive: boolean;
 };
+
+type MembershipPlanRow = {
+  id: string;
+  name: string;
+  billing_period: string | null;
+  price: number | null;
+  status: string | null;
+};
+
+const {url, anonKey} = getSupabaseEnv();
+const supabase = createClient(url, anonKey);
 
 @Component({
   selector: 'app-membership-plans',
@@ -29,6 +42,9 @@ type MembershipPlan = {
           <input [(ngModel)]="filter" placeholder="Search by name" />
         </label>
       </div>
+
+      <p *ngIf="loading">Loading plans…</p>
+      <p *ngIf="!loading && error" class="error">{{ error }}</p>
 
       <table>
         <thead>
@@ -101,42 +117,49 @@ type MembershipPlan = {
         background-color: #fee2e2;
         color: #991b1b;
       }
+
+      .error {
+        color: #b91c1c;
+        font-size: 0.875rem;
+      }
     `,
   ],
 })
-export class MembershipPlansComponent {
+export class MembershipPlansComponent implements OnInit {
   protected filter = '';
 
-  protected plans: MembershipPlan[] = [
-    {
-      id: 'standard-monthly',
-      name: 'Standard monthly',
-      billingPeriod: 'monthly',
-      price: 49,
-      isActive: true,
-    },
-    {
-      id: 'premium-monthly',
-      name: 'Premium monthly',
-      billingPeriod: 'monthly',
-      price: 69,
-      isActive: true,
-    },
-    {
-      id: 'annual',
-      name: 'Annual all-access',
-      billingPeriod: 'yearly',
-      price: 599,
-      isActive: true,
-    },
-    {
-      id: 'founders',
-      name: 'Founders legacy',
-      billingPeriod: 'monthly',
-      price: 39,
-      isActive: false,
-    },
-  ];
+  protected loading = false;
+  protected error: string | null = null;
+  protected plans: MembershipPlan[] = [];
+
+  ngOnInit() {
+    this.loadPlans();
+  }
+
+  async loadPlans() {
+    this.loading = true;
+    this.error = null;
+    const {data, error} = await supabase
+      .from('membership_plans')
+      .select('id,name,billing_period,price,status')
+      .order('name', {ascending: true});
+
+    if (error) {
+      this.loading = false;
+      this.error = 'Unable to load membership plans.';
+      return;
+    }
+
+    const rows = (data ?? []) as MembershipPlanRow[];
+    this.plans = rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      billingPeriod: row.billing_period === 'yearly' ? 'yearly' : 'monthly',
+      price: row.price ?? 0,
+      isActive: row.status === 'active',
+    }));
+    this.loading = false;
+  }
 
   get filteredPlans(): MembershipPlan[] {
     const term = this.filter.toLowerCase().trim();
@@ -146,4 +169,3 @@ export class MembershipPlansComponent {
     return this.plans.filter(plan => plan.name.toLowerCase().includes(term));
   }
 }
-
