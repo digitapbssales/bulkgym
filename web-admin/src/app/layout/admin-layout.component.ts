@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {AdminAuthService} from '../auth/admin-auth.service';
 
@@ -38,9 +38,19 @@ type AdminNavItem = {
       <main class="content">
         <header class="top-bar">
           <span class="top-bar-title">Super admin</span>
-          <button type="button" class="sign-out" (click)="onSignOut()">
-            Sign out
-          </button>
+          <div class="top-bar-actions">
+            <button 
+              type="button" 
+              class="theme-toggle" 
+              (click)="toggleTheme()" 
+              [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <span class="icon">{{ isDarkMode ? '☀️' : '🌙' }}</span>
+            </button>
+            <button type="button" class="sign-out" (click)="onSignOut()">
+              Sign out
+            </button>
+          </div>
         </header>
         <router-outlet />
       </main>
@@ -48,8 +58,9 @@ type AdminNavItem = {
   `,
   styleUrls: ['./admin-layout.component.scss'],
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   private readonly auth = inject(AdminAuthService);
+  isDarkMode = true;
 
   protected readonly navItems: AdminNavItem[] = [
     {
@@ -78,6 +89,35 @@ export class AdminLayoutComponent {
       description: 'Audit logs, payments, and automation status',
     },
   ];
+
+  ngOnInit() {
+    this.initializeTheme();
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    this.applyTheme();
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  private initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.isDarkMode = savedTheme === 'dark';
+    } else {
+      // Default to dark
+      this.isDarkMode = true;
+    }
+    this.applyTheme();
+  }
+
+  private applyTheme() {
+    if (this.isDarkMode) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }
 
   async onSignOut() {
     await this.auth.signOut();

@@ -20,17 +20,18 @@ import {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(circle at top right, #1e293b, #020617);
+        background: radial-gradient(circle at top right, var(--bg-sidebar), var(--bg-body));
         padding: 1rem;
+        color: var(--text-main);
       }
 
       .auth-card {
         width: 100%;
         max-width: 400px;
         padding: 2.5rem;
-        background: rgba(15, 23, 42, 0.6);
+        background: var(--bg-card);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
         border-radius: 1rem;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       }
@@ -46,7 +47,7 @@ import {
       }
 
       .auth-subtitle {
-        color: #94a3b8;
+        color: var(--text-muted);
         font-size: 0.875rem;
         text-align: center;
         margin-bottom: 2rem;
@@ -68,16 +69,16 @@ import {
       .field span {
         font-size: 0.875rem;
         font-weight: 500;
-        color: #cbd5e1;
+        color: var(--text-main);
       }
 
       input,
       select {
         padding: 0.75rem 1rem;
         border-radius: 0.5rem;
-        background: rgba(2, 6, 23, 0.5);
-        border: 1px solid #334155;
-        color: #f8fafc;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
         font-family: inherit;
         font-size: 0.95rem;
         transition: all 0.2s;
@@ -86,15 +87,15 @@ import {
       input:focus,
       select:focus {
         outline: none;
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
       }
 
       button {
         margin-top: 0.5rem;
         padding: 0.75rem;
         border-radius: 0.5rem;
-        background: linear-gradient(to right, #3b82f6, #8b5cf6);
+        background: linear-gradient(to right, var(--primary), #8b5cf6);
         color: white;
         font-weight: 600;
         border: none;

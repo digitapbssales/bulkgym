@@ -263,6 +263,29 @@ Sub-sections and screens:
    - Filters: severity, service, time window.
 
 ==================================================
+UI/UX & THEMING
+==================================================
+
+Purpose:
+
+- Ensure the Super Admin panel is visually appealing, modern, and accessible.
+- Support user preference for visual themes.
+
+Requirements:
+
+- Modern, Clean Design:
+  - Use consistent spacing, typography, and card-based layouts.
+  - Interactive elements should have clear states (hover, active, disabled).
+  - Use a modern color palette that reflects the brand but is optimized for data density.
+
+- Theming:
+  - Implement a global Dark/Light theme toggle.
+  - Default to system preference or a specific default (e.g., Light).
+  - Persist user preference (e.g., in local storage).
+  - Ensure all components (cards, inputs, tables, charts) respond correctly to theme changes.
+  - Dark mode should use appropriate contrast ratios for readability.
+
+==================================================
 OUTPUT EXPECTATIONS
 ==================================================
 
