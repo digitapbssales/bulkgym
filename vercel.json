@@ -1,8 +1,7 @@
 {
   "version": 2,
   "framework": "angular",
-  "installCommand": "cd web-admin && npm ci",
+  "installCommand": "cd web-admin && npm install",
   "buildCommand": "cd web-admin && npm run build",
   "outputDirectory": "web-admin/dist/web-admin/browser"
 }
-
