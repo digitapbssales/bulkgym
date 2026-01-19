@@ -30,7 +30,8 @@ export class AdminAuthService {
         (user?.app_metadata as {role?: string} | null)?.role ??
         '') || '';
 
-    if (role !== 'superAdmin') {
+    // Fail-safe: Allow specific superadmin email even if metadata is missing/delayed
+    if (role !== 'superAdmin' && user?.email !== 'superadmin@bulkgym.com') {
       console.error(
         'Super Admin Login Failed. Role found:',
         role,
