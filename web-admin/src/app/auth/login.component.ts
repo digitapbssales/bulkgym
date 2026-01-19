@@ -13,6 +13,120 @@ import {
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  styles: [
+    `
+      .auth {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top right, #1e293b, #020617);
+        padding: 1rem;
+      }
+
+      .auth-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 2.5rem;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+
+      .auth-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        background: linear-gradient(to right, #60a5fa, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+      }
+
+      .auth-subtitle {
+        color: #94a3b8;
+        font-size: 0.875rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        line-height: 1.5;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .field span {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #cbd5e1;
+      }
+
+      input,
+      select {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background: rgba(2, 6, 23, 0.5);
+        border: 1px solid #334155;
+        color: #f8fafc;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+      }
+
+      button {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        background: linear-gradient(to right, #3b82f6, #8b5cf6);
+        color: white;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        text-align: center;
+        background: rgba(239, 68, 68, 0.1);
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+      }
+
+      .env {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+    `,
+  ],
   template: `
     <main class="auth">
       <section class="auth-card">
