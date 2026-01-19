@@ -11,6 +11,15 @@ export const adminAuthGuard: CanActivateFn = () => {
   return router.createUrlTree(['/auth/login']) as UrlTree;
 };
 
+export const gymAuthGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  const auth = inject(AdminAuthService);
+  if (auth.canAccessGymPanel()) {
+    return true;
+  }
+  return router.createUrlTree(['/auth/login']) as UrlTree;
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -33,6 +42,75 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'gym',
+    canActivate: [gymAuthGuard],
+    loadComponent: () =>
+      import('./layout/gym-layout.component').then(m => m.GymLayoutComponent),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'overview',
+      },
+      {
+        path: 'overview',
+        loadComponent: () =>
+          import('./sections/gym/gym-overview.component').then(
+            m => m.GymOverviewComponent,
+          ),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./sections/gym/gym-users.component').then(
+            m => m.GymUsersComponent,
+          ),
+      },
+      {
+        path: 'config',
+        loadComponent: () =>
+          import('./sections/gym/gym-config.component').then(
+            m => m.GymConfigComponent,
+          ),
+      },
+      {
+        path: 'finance',
+        loadComponent: () =>
+          import('./sections/gym/gym-finance.component').then(
+            m => m.GymFinanceComponent,
+          ),
+      },
+      {
+        path: 'reception',
+        loadComponent: () =>
+          import('./sections/gym-staff/receptionist-walk-in.component').then(
+            m => m.ReceptionistWalkInComponent,
+          ),
+      },
+      {
+        path: 'crm',
+        loadComponent: () =>
+          import('./sections/gym-staff/sales-crm.component').then(
+            m => m.SalesCrmComponent,
+          ),
+      },
+      {
+        path: 'guard',
+        loadComponent: () =>
+          import('./sections/gym-staff/guard-view.component').then(
+            m => m.GuardViewComponent,
+          ),
+      },
+      {
+        path: 'trainer',
+        loadComponent: () =>
+          import('./sections/gym-staff/trainer-panel.component').then(
+            m => m.TrainerPanelComponent,
+          ),
+      },
+    ],
+  },
+  {
     path: 'app',
     canActivate: [adminAuthGuard],
     loadComponent: () =>
@@ -43,7 +121,31 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'system',
+        redirectTo: 'platform',
+      },
+      {
+        path: 'platform',
+        children: [
+          {
+            path: '',
+            redirectTo: 'tenants',
+            pathMatch: 'full',
+          },
+          {
+            path: 'tenants',
+            loadComponent: () =>
+              import('./sections/platform/tenant-management.component').then(
+                m => m.TenantManagementComponent,
+              ),
+          },
+          {
+            path: 'finance',
+            loadComponent: () =>
+              import('./sections/platform/platform-finance.component').then(
+                m => m.PlatformFinanceComponent,
+              ),
+          },
+        ],
       },
       {
         path: 'system',

@@ -3,22 +3,22 @@ import {Component, inject, OnInit} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {AdminAuthService} from '../auth/admin-auth.service';
 
-type AdminNavItem = {
+type NavItem = {
   label: string;
   path: string;
   description: string;
 };
 
 @Component({
-  selector: 'app-admin-layout',
+  selector: 'app-gym-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <div class="layout">
       <aside class="sidebar">
         <div class="brand">
-          <span class="brand-mark">BG</span>
-          <span class="brand-text">Bulk Gym Admin</span>
+          <span class="brand-mark">GA</span>
+          <span class="brand-text">Gym Admin</span>
         </div>
 
         <nav class="nav">
@@ -37,7 +37,7 @@ type AdminNavItem = {
 
       <main class="content">
         <header class="top-bar">
-          <span class="top-bar-title">Super admin</span>
+          <span class="top-bar-title">Gym Admin</span>
           <div class="top-bar-actions">
             <button 
               type="button" 
@@ -58,50 +58,84 @@ type AdminNavItem = {
   `,
   styleUrls: ['./admin-layout.component.scss'],
 })
-export class AdminLayoutComponent implements OnInit {
+export class GymLayoutComponent implements OnInit {
   private readonly auth = inject(AdminAuthService);
   isDarkMode = true;
 
-  protected readonly navItems: AdminNavItem[] = [
-    {
-      label: 'Tenant Management',
-      path: '/app/platform/tenants',
-      description: 'Manage gyms and subscriptions',
-    },
-    {
-      label: 'Platform Finance',
-      path: '/app/platform/finance',
-      description: 'Revenue and payment gateways',
-    },
-    {
-      label: 'System control',
-      path: '/app/system',
-      description: 'Super admin access, system overview, and global settings',
-    },
-    {
-      label: 'Configuration',
-      path: '/app/configuration',
-      description: 'Plans, trainers, schedules, promotions',
-    },
-    {
-      label: 'Content',
-      path: '/app/content',
-      description: 'Workout, nutrition, and media content',
-    },
-    {
-      label: 'Analytics',
-      path: '/app/analytics',
-      description: 'Revenue, membership, and engagement dashboards',
-    },
-    {
-      label: 'Monitoring',
-      path: '/app/monitoring',
-      description: 'Audit logs, payments, and automation status',
-    },
-  ];
+  protected navItems: NavItem[] = [];
 
   ngOnInit() {
     this.initializeTheme();
+    this.setupNavigation();
+  }
+
+  private setupNavigation() {
+    const role = this.auth.getUserRole();
+
+    if (role === 'gymAdmin') {
+      this.navItems = [
+        {
+          label: 'Overview',
+          path: '/gym/overview',
+          description: 'Gym Dashboard',
+        },
+        {
+          label: 'User Management',
+          path: '/gym/users',
+          description: 'Manage staff and members',
+        },
+        {
+          label: 'Configuration',
+          path: '/gym/config',
+          description: 'Gym details and branding',
+        },
+        {
+          label: 'Finance & Payments',
+          path: '/gym/finance',
+          description: 'Revenue and payment gateways',
+        },
+      ];
+    } else if (role === 'accounts') {
+      this.navItems = [
+        {
+          label: 'Finance & Payments',
+          path: '/gym/finance',
+          description: 'Revenue and payment gateways',
+        },
+      ];
+    } else if (role === 'guard') {
+      this.navItems = [
+        {
+          label: 'Guard Terminal',
+          path: '/gym/guard',
+          description: 'Scan attendance',
+        },
+      ];
+    } else if (role === 'trainer') {
+      this.navItems = [
+        {
+          label: 'Trainer Dashboard',
+          path: '/gym/trainer',
+          description: 'Profile and Schedule',
+        },
+      ];
+    } else if (role === 'receptionist') {
+      this.navItems = [
+        {
+          label: 'Reception',
+          path: '/gym/reception',
+          description: 'Walk-in Entry',
+        },
+      ];
+    } else if (role === 'sales' || role === 'sales_marketing') {
+      this.navItems = [
+        {
+          label: 'Sales CRM',
+          path: '/gym/crm',
+          description: 'Manage leads',
+        },
+      ];
+    }
   }
 
   toggleTheme() {
@@ -115,7 +149,6 @@ export class AdminLayoutComponent implements OnInit {
     if (savedTheme) {
       this.isDarkMode = savedTheme === 'dark';
     } else {
-      // Default to dark
       this.isDarkMode = true;
     }
     this.applyTheme();

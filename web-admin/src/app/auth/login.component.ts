@@ -220,11 +220,18 @@ export class LoginComponent {
 
     try {
       await this.auth.signInWithEmail(email, password);
-      await this.router.navigate(['/app']);
+      
+      if (this.auth.isSuperAdminSession()) {
+        await this.router.navigate(['/app']);
+      } else if (this.auth.isTenantAdminSession()) {
+        await this.router.navigate(['/gym']);
+      } else {
+        await this.router.navigate(['/']);
+      }
     } catch (err) {
       const message =
-        err instanceof Error && err.message === 'not_super_admin'
-          ? 'This account does not have super admin access.'
+        err instanceof Error && (err.message === 'not_super_admin' || err.message === 'unauthorized_role')
+          ? 'This account does not have admin access.'
           : 'Invalid credentials or unable to reach the auth service.';
       this.error.set(message);
     } finally {

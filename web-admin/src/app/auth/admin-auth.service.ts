@@ -11,6 +11,7 @@ const supabase = createClient(url, anonKey);
 })
 export class AdminAuthService {
   private readonly roleKey = 'bg_admin_role';
+  private readonly tenantKey = 'bg_tenant_id';
   private readonly router = inject(Router);
 
   async signInWithEmail(email: string, password: string) {
@@ -25,28 +26,59 @@ export class AdminAuthService {
 
     const session = data.session;
     const user = session?.user;
-    const role =
-      ((user?.user_metadata as {role?: string} | null)?.role ??
-        (user?.app_metadata as {role?: string} | null)?.role ??
-        '') || '';
 
-    // Fail-safe: Allow specific superadmin email even if metadata is missing/delayed
+    if (!user) throw new Error('No user found');
+
+    // 1. Try to fetch profile from public.profiles (SaaS Architecture)
+    const {data: profile} = await supabase
+      .from('profiles')
+      .select('role, tenant_id')
+      .eq('id', user.id)
+      .single();
+
+    let role = profile?.role;
+    const tenantId = profile?.tenant_id;
+
+    // 2. Fallback to metadata if profile not found (Backward Compatibility)
+    if (!role) {
+      role =
+        ((user?.user_metadata as {role?: string} | null)?.role ??
+          (user?.app_metadata as {role?: string} | null)?.role ??
+          '') || '';
+    }
+
+    // Fail-safe: Allow specific superadmin email
     const isSuperEmail = user?.email?.toLowerCase() === 'superadmin@bulkgym.com';
     
-    if (role !== 'superAdmin' && !isSuperEmail) {
+    if (isSuperEmail && !role) {
+        role = 'superAdmin';
+    }
+
+    if (
+      role !== 'superAdmin' &&
+      role !== 'gymAdmin' &&
+      role !== 'accounts' &&
+      role !== 'guard' &&
+      role !== 'trainer' &&
+      role !== 'receptionist' &&
+      role !== 'sales'
+    ) {
       console.error(
-        'Super Admin Login Failed.',
+        'Login Failed. Unauthorized Role.',
         'Role:', role,
-        'Email:', user?.email,
-        'User metadata:', user?.user_metadata,
-        'App metadata:', user?.app_metadata,
+        'Email:', user?.email
       );
       await supabase.auth.signOut();
-      throw new Error('not_super_admin');
+      throw new Error('unauthorized_role');
     }
 
     if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(this.roleKey, 'superAdmin');
+      window.sessionStorage.setItem(this.roleKey, role || '');
+      if (tenantId) {
+        window.sessionStorage.setItem(this.tenantKey, tenantId);
+      } else {
+        window.sessionStorage.removeItem(this.tenantKey);
+      }
     }
   }
 
@@ -55,17 +87,37 @@ export class AdminAuthService {
     return data.session?.access_token ?? null;
   }
 
-  isSuperAdminSession() {
+  getUserRole(): string {
     if (typeof window === 'undefined') {
-      return false;
+      return '';
     }
-    const raw = window.sessionStorage.getItem(this.roleKey);
-    return raw === 'superAdmin';
+    return window.sessionStorage.getItem(this.roleKey) || '';
+  }
+
+  isSuperAdminSession() {
+    return this.getUserRole() === 'superAdmin';
+  }
+
+  isTenantAdminSession() {
+    return this.getUserRole() === 'gymAdmin';
+  }
+
+  canAccessGymPanel() {
+    const role = this.getUserRole();
+    return ['gymAdmin', 'accounts', 'guard', 'trainer', 'receptionist', 'sales'].includes(role);
+  }
+
+  getTenantId() {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return window.sessionStorage.getItem(this.tenantKey);
   }
 
   async signOut() {
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem(this.roleKey);
+      window.sessionStorage.removeItem(this.tenantKey);
     }
     await supabase.auth.signOut();
     await this.router.navigate(['/auth/login']);
